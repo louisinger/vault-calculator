@@ -39,9 +39,17 @@
     "format:check": "npx prettier --check src/**/*.svelte",
     "format": "npx prettier --write src/**/*.svelte"
   },
+  "resolutions": {
+    "liquidjs-lib": "git+https://github.com/louisinger/liquidjs-lib.git#psbt-taproot-support"
+  },
   "dependencies": {
+    "@ionio-lang/ionio": "../ionio/packages/ionio",
     "bulma": "^0.9.3",
-    "svelte-marina-button": "^0.1.4"
+    "classnames": "^2.3.1",
+    "ldk": "^0.5.1",
+    "marina-provider": "^1.7.0",
+    "svelte-marina-button": "^0.1.4",
+    "tiny-secp256k1": "^2.2.1"
   },
   "prettier": {
     "tabWidth": 2,
