@@ -1,16 +1,27 @@
 <script lang="ts">
-import { createAccount } from "../utils";
-import { toDescriptor, transformArtifact, TemplateString, Artifact } from '@ionio-lang/ionio';
-import artifact from '../calculator.json';
+  import { createAccount } from '../utils';
+  import {
+    toDescriptor,
+    transformArtifact,
+    TemplateString,
+    Artifact,
+  } from '@ionio-lang/ionio';
+  import artifact from '../calculator.json';
 
-let sum: number;
-let accountNamespace: string;
+  let sum: number;
+  let accountNamespace: string;
 
-const handleSubmit = async () => {
-    console.log(artifact)
-    const transformedArtifact = transformArtifact(artifact as Artifact, [undefined, TemplateString(accountNamespace)]);
-    await createAccount(accountNamespace, toDescriptor(transformArtifact(transformedArtifact, [sum])));
-};
+  const handleSubmit = async () => {
+    console.log(artifact);
+    const transformedArtifact = transformArtifact(artifact as Artifact, [
+      undefined,
+      TemplateString(accountNamespace),
+    ]);
+    await createAccount(
+      accountNamespace,
+      toDescriptor(transformArtifact(transformedArtifact, [sum]))
+    );
+  };
 </script>
 
 <form class="box">
@@ -45,5 +56,7 @@ const handleSubmit = async () => {
     </p>
   </div>
 
-  <button type="button" class="button" on:click={handleSubmit}>CREATE ACCOUNT</button>
+  <button type="button" class="button" on:click={handleSubmit}
+    >CREATE ACCOUNT</button
+  >
 </form>

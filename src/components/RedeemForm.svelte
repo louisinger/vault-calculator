@@ -8,20 +8,21 @@
 
   const FEE = 450;
 
-  $: coinToRedeem = null
+  $: coinToRedeem = null;
 
   let recipient: string;
   let error: string;
   let txid: string | null = null;
 
-  let a, b = 0;
+  let a,
+    b = 0;
 
   $: accountNamespace = getSelectedAccountUtxos();
   $: leafData = {
     leaf: null,
     sum: 0,
     xonlypubkey: '',
-  }
+  };
 
   async function getSelectedAccountUtxos(): Promise<Utxo[]> {
     const marina = await detectProvider();
@@ -44,27 +45,33 @@
     leafData.xonlypubkey = addressOwningCoin.publicKey;
   };
 
-  $: signer = ({
+  $: signer = {
     signTransaction: async (psetb64) => {
       const marina = await detectProvider();
       const pset = decodePset(psetb64);
-      const leafScriptHex = (leafData.leaf as bip341.HashTree).scriptHex
+      const leafScriptHex = (leafData.leaf as bip341.HashTree).scriptHex;
 
       // signal to marina the leaf choosen by the user
       pset.updateInput(0, {
         // @ts-ignore
-        tapLeafScript: [{ leafVersion: 0, script: Buffer.from(leafScriptHex, 'hex'), controlBlock: Buffer.alloc(33) }]
-      })
+        tapLeafScript: [
+          {
+            leafVersion: 0,
+            script: Buffer.from(leafScriptHex, 'hex'),
+            controlBlock: Buffer.alloc(33),
+          },
+        ],
+      });
 
       return marina.signTransaction(pset.toBase64());
-    }
-  })
+    },
+  };
 
   const handleSubmit = async () => {
     try {
       const amount = parseInt(coinToRedeem.unblindData.value, 10);
       const marina = await detectProvider();
-      
+
       const network = getNetwork(await marina.getNetwork());
       const contract = new Contract(
         artifact as Artifact,
@@ -78,7 +85,7 @@
         .withUtxo(coinToRedeem)
         .withRecipient(recipient, amount - FEE, network.assetHash)
         .withFeeOutput(FEE);
-      
+
       const signed = await tx.unlock();
       const hex = signed.psbt.extractTransaction().toHex();
       const r = await marina.broadcastTransaction(hex);
@@ -105,7 +112,9 @@
 </script>
 
 <div class="box">
-  <button type="button" class="button" on:click={reloadCoins}>RELOAD COINS</button>
+  <button type="button" class="button" on:click={reloadCoins}
+    >RELOAD COINS</button
+  >
 
   <form>
     <div class="field">
@@ -124,7 +133,11 @@
     <div class="field">
       <div class="select">
         {#await accountNamespace then coins}
-          <select class="select is-primary" bind:value={coinToRedeem} on:change={onSelectCoin}>
+          <select
+            class="select is-primary"
+            bind:value={coinToRedeem}
+            on:change={onSelectCoin}
+          >
             {#each coins as utxo}
               <option value={utxo}>{utxo.unblindData.value} sats (L-BTC)</option
               >
@@ -149,7 +162,7 @@
     {/if}
     {#if txid}
       <p>
-       Send! {txid}
+        Send! {txid}
       </p>
     {/if}
   </form>

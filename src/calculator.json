@@ -35,14 +35,6 @@
         "$pubkey",
         "OP_CHECKSIG"
       ]
-    },
-    {
-      "name": "fake",
-      "functionInputs": [],
-      "require": [],
-      "asm": [
-        "OP_FALSE"
-      ]
     }
   ]
 }

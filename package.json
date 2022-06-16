@@ -46,7 +46,7 @@
     "@ionio-lang/ionio": "^0.1.4",
     "bulma": "^0.9.3",
     "classnames": "^2.3.1",
-    "ldk": "^0.5.1",
+    "ldk": "^0.5.2",
     "marina-provider": "^1.7.0",
     "svelte-marina-button": "^0.1.4",
     "tiny-secp256k1": "^2.2.1"
