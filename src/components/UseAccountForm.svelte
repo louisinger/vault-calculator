@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { AccountID, Balance, detectProvider } from 'marina-provider';
-  import { current_component } from 'svelte/internal';
+  import { AccountID,  detectProvider } from 'marina-provider';
   import { transferLBTCToAccount } from '../utils';
 
   let selectedNamespace: string;
