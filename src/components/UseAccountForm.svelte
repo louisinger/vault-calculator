@@ -8,6 +8,7 @@
   let transferAmount: number;
   let transferError: string | null = null;
   let txid: string | null = null;
+  let sum: number;
 
   $: currentNamespace = getSelectedAccount();
 
@@ -57,7 +58,7 @@
       transferError = null;
       txid = null;
       const currentMarinaAccount = await getSelectedAccount();
-      txid = await transferLBTCToAccount(currentMarinaAccount, transferAmount);
+      txid = await transferLBTCToAccount(currentMarinaAccount, transferAmount, sum);
     } catch (e) {
       transferError = handleError(e);
     } finally {
@@ -101,7 +102,7 @@
   </form>
 
   <form>
-    <h2>Transfer some of your funds to selected account</h2>
+    <h2>Lock some of your mainAccount funds to selected account</h2>
     <div class="field">
       <!-- svelte-ignore a11y-label-has-associated-control -->
       <label class="label">Amount</label>
@@ -115,6 +116,19 @@
         />
       </p>
     </div>
+      <div class="field">
+    <!-- svelte-ignore a11y-label-has-associated-control -->
+    <label class="label">The "lock" sum</label>
+    <p class="control">
+      <input
+        class="input"
+        type="number"
+        placeholder="6"
+        bind:value={sum}
+        required
+      />
+    </p>
+  </div>
     <button type="button" class="button" on:click={transferToSelectedAccount}
       >SEND</button
     >
