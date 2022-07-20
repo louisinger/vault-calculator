@@ -8,7 +8,6 @@
   } from '@ionio-lang/ionio';
   import artifact from '../calculator.json';
 
-  let sum: number;
   let accountNamespace: string;
 
   const handleSubmit = async () => {
@@ -19,7 +18,7 @@
     ]);
     await createAccount(
       accountNamespace,
-      toDescriptor(transformArtifact(transformedArtifact, [sum]))
+      transformedArtifact
     );
   };
 </script>
@@ -37,20 +36,6 @@
         type="text"
         placeholder="eg. borrowAccount"
         bind:value={accountNamespace}
-        required
-      />
-    </p>
-  </div>
-
-  <div class="field">
-    <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label class="label">The "lock" sum</label>
-    <p class="control">
-      <input
-        class="input"
-        type="number"
-        placeholder="6"
-        bind:value={sum}
         required
       />
     </p>

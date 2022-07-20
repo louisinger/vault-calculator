@@ -1,7 +1,8 @@
+import type { Artifact } from "@ionio-lang/ionio";
 import { bip341, getNetwork, script } from "ldk";
 import { detectProvider } from "marina-provider";
 
-export async function createAccount(namespace: string, template: string) {
+export async function createAccount(namespace: string, artifact: Artifact) {
     const marina = await detectProvider('marina');
     if (await marina.getSelectedAccount() === namespace) return;
     let ok = false;
@@ -15,21 +16,21 @@ export async function createAccount(namespace: string, template: string) {
       await marina.createAccount(namespace) 
       await marina.useAccount(namespace);
       await marina.importTemplate({
-          type: 'marina-descriptors',
-          template,
+          type: 'ionio-artifact',
+          template: JSON.stringify(artifact),
         });
     }
 }
 
 // send some marina coins to another account
 // a send-to-wallet - fees pset
-export async function transferLBTCToAccount(namespace: string, amount: number): Promise<string> {
+export async function transferLBTCToAccount(namespace: string, amount: number, sum: number): Promise<string> {
   const marina = await detectProvider('marina');
   if (await marina.getSelectedAccount() !== namespace) throw new Error('wrong account');
   const network = await marina.getNetwork();
   const asset = getNetwork(network).assetHash;
   const tx = await marina.sendTransaction([{
-    address: (await marina.getNextAddress()).confidentialAddress,
+    address: (await marina.getNextAddress({ sum })).confidentialAddress,
     value: amount,
     asset,
   }]);

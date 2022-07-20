@@ -9,6 +9,7 @@
   const FEE = 450;
 
   $: coinToRedeem = null;
+  $: contract = null;
 
   let recipient: string;
   let error: string;
@@ -33,13 +34,18 @@
   const onSelectCoin = async () => {
     const marina = await detectProvider();
 
-    const addresses = await marina.getAddresses();
+    const addresses = await marina.getAddresses([await marina.getSelectedAccount()]);
     const addressOwningCoin = addresses.find((a) =>
       address
         .toOutputScript(a.confidentialAddress)
         .equals(coinToRedeem.prevout.script)
     );
 
+    if (!addressOwningCoin) {
+      throw new Error('address owning coin not found');
+    }
+
+    contract = addressOwningCoin['contract'] as Contract;
     const tree = addressOwningCoin['taprootHashTree'] as bip341.HashTree;
     leafData = findRedeemLeaf(tree);
     leafData.xonlypubkey = addressOwningCoin.publicKey;
