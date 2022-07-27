@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { address, bip341, decodePset, getNetwork } from 'ldk';
+import { Contract } from '@ionio-lang/ionio';
+
+  import * as ecc from 'tiny-secp256k1'
+  import { address, decodePset, getNetwork, UnblindedOutput } from 'ldk';
   import { detectProvider, Utxo } from 'marina-provider';
-  import * as ecc from 'tiny-secp256k1';
-  import { findRedeemLeaf } from '../utils';
-  import artifact from '../calculator.json';
-  import { Contract, Artifact } from '@ionio-lang/ionio';
 
   const FEE = 450;
 
@@ -19,12 +18,6 @@
     b = 0;
 
   $: accountNamespace = getSelectedAccountUtxos();
-  $: leafData = {
-    leaf: null,
-    sum: 0,
-    xonlypubkey: '',
-  };
-
   async function getSelectedAccountUtxos(): Promise<Utxo[]> {
     const marina = await detectProvider();
     const selectedAccount = await marina.getSelectedAccount();
@@ -45,31 +38,16 @@
       throw new Error('address owning coin not found');
     }
 
-    contract = addressOwningCoin['contract'] as Contract;
-    const tree = addressOwningCoin['taprootHashTree'] as bip341.HashTree;
-    leafData = findRedeemLeaf(tree);
-    leafData.xonlypubkey = addressOwningCoin.publicKey;
+    contract = addressOwningCoin['contract'];
   };
 
   $: signer = {
     signTransaction: async (psetb64) => {
       const marina = await detectProvider();
-      const pset = decodePset(psetb64);
-      const leafScriptHex = (leafData.leaf as bip341.HashTree).scriptHex;
-
-      // signal to marina the leaf choosen by the user
-      pset.updateInput(0, {
-        // @ts-ignore
-        tapLeafScript: [
-          {
-            leafVersion: 0,
-            script: Buffer.from(leafScriptHex, 'hex'),
-            controlBlock: Buffer.alloc(33),
-          },
-        ],
-      });
-
-      return marina.signTransaction(pset.toBase64());
+      console.log(decodePset(psetb64))
+      const signed = await marina.signTransaction(psetb64);
+      console.log(decodePset(signed))
+      return signed
     },
   };
 
@@ -79,18 +57,21 @@
       const marina = await detectProvider();
 
       const network = getNetwork(await marina.getNetwork());
-      const contract = new Contract(
-        artifact as Artifact,
-        [leafData.sum, Buffer.from(leafData.xonlypubkey, 'hex')],
+      const contractCopy = new Contract(
+        contract.artifact,
+        contract.constructorArgs,
         network,
         ecc
       );
 
-      const tx = contract.functions
+      const coin = coinToRedeem as UnblindedOutput;
+
+      const tx = contractCopy.from(coin.txid, coin.vout, coin.prevout, coin.unblindData).functions
         .transferWithSum(a, b, signer)
-        .withUtxo(coinToRedeem)
         .withRecipient(recipient, amount - FEE, network.assetHash)
         .withFeeOutput(FEE);
+
+      console.log(tx.psbt)
 
       const signed = await tx.unlock();
       const hex = signed.psbt.extractTransaction().toHex();
@@ -98,6 +79,7 @@
       txid = r.txid;
     } catch (e) {
       handleError(e);
+      throw e
     } finally {
       coinToRedeem = null;
     }
@@ -151,8 +133,8 @@
           </select>
         {/await}
       </div>
-      {#if coinToRedeem}
-        <h2>Sum must be {leafData.sum}</h2>
+      {#if contract != null}
+        <h2>Sum must be {contract.constructorArgs[0]}</h2>
         <p class="control">
           <input class="input" type="number" bind:value={a} required />
         </p>
