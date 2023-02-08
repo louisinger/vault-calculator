@@ -34,6 +34,7 @@
             'is-active': selectedTab === Tab.CreateAccount,
           })}
         >
+          <!-- svelte-ignore a11y-invalid-attribute -->
           <a href="#" on:click={makeSelectFunc(Tab.CreateAccount)}>Create account</a>
         </li>
         <li
@@ -41,6 +42,7 @@
             'is-active': selectedTab === Tab.UseAccount,
           })}
         >
+          <!-- svelte-ignore a11y-invalid-attribute -->
           <a href="#" on:click={makeSelectFunc(Tab.UseAccount)}>Use account</a>
         </li>
         <li
@@ -48,6 +50,7 @@
             'is-active': selectedTab === Tab.Redeem,
           })}
         >
+          <!-- svelte-ignore a11y-invalid-attribute -->
           <a href="#" on:click={makeSelectFunc(Tab.Redeem)}>Redeem coin</a>
         </li>
       </ul>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AccountID,  detectProvider } from 'marina-provider';
+  import { AccountID,  AccountType,  detectProvider } from 'marina-provider';
   import { transferLBTCToAccount } from '../utils';
 
   let selectedNamespace: string;
@@ -27,6 +27,8 @@
       if ((await marina.getSelectedAccount()) !== selectedNamespace) {
         const ok = await marina.useAccount(selectedNamespace);
         if (!ok) throw new Error('Account not found');
+        const infos = await marina.getAccountInfo(selectedNamespace);
+        if (infos.type !== AccountType.Ionio) throw new Error('Account is not an Ionio account');
       }
       currentNamespace = Promise.resolve(selectedNamespace);
     } catch (e) {
@@ -61,6 +63,7 @@
       txid = await transferLBTCToAccount(currentMarinaAccount, transferAmount, sum);
     } catch (e) {
       transferError = handleError(e);
+      console.error(e);
     } finally {
       transferAmount = 0;
     }

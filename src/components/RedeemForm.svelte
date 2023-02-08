@@ -1,11 +1,11 @@
 <script lang="ts">
-import { Contract } from '@ionio-lang/ionio';
+  import { Contract } from '@ionio-lang/ionio';
+  import * as ecc from 'tiny-secp256k1';
+  import zkpLib from '@vulpemventures/secp256k1-zkp';
+  import { detectProvider, isIonioScriptDetails, Utxo } from 'marina-provider';
+  import { AssetHash, Extractor, networks } from 'liquidjs-lib';
 
-  import * as ecc from 'tiny-secp256k1'
-  import { address, decodePset, getNetwork, UnblindedOutput } from 'ldk';
-  import { detectProvider, Utxo } from 'marina-provider';
-
-  const FEE = 450;
+  const FEE = 380;
 
   $: coinToRedeem = null;
   $: contract = null;
@@ -14,8 +14,7 @@ import { Contract } from '@ionio-lang/ionio';
   let error: string;
   let txid: string | null = null;
 
-  let a,
-    b = 0;
+  let a, b = 0;
 
   $: accountNamespace = getSelectedAccountUtxos();
   async function getSelectedAccountUtxos(): Promise<Utxo[]> {
@@ -25,61 +24,54 @@ import { Contract } from '@ionio-lang/ionio';
   }
 
   const onSelectCoin = async () => {
-    const marina = await detectProvider();
-
-    const addresses = await marina.getAddresses([await marina.getSelectedAccount()]);
-    const addressOwningCoin = addresses.find((a) =>
-      address
-        .toOutputScript(a.confidentialAddress)
-        .equals(coinToRedeem.prevout.script)
-    );
-
-    if (!addressOwningCoin) {
-      throw new Error('address owning coin not found');
+    const { scriptDetails } = coinToRedeem as Utxo;
+    if (isIonioScriptDetails(scriptDetails)) {
+      contract = new Contract(
+        scriptDetails.artifact,
+        scriptDetails.params,
+        networks[scriptDetails.network],
+        { ecc, zkp: await zkpLib() }
+      );
+    } else {
+      throw new Error('Coin is not a Ionio contract');
     }
-
-    contract = addressOwningCoin['contract'];
   };
 
   $: signer = {
     signTransaction: async (psetb64) => {
       const marina = await detectProvider();
-      console.log(decodePset(psetb64))
       const signed = await marina.signTransaction(psetb64);
-      console.log(decodePset(signed))
-      return signed
+      return signed;
     },
   };
 
   const handleSubmit = async () => {
     try {
-      const amount = parseInt(coinToRedeem.unblindData.value, 10);
       const marina = await detectProvider();
 
-      const network = getNetwork(await marina.getNetwork());
-      const contractCopy = new Contract(
-        contract.artifact,
-        contract.constructorArgs,
-        network,
-        ecc
-      );
+      const coin = coinToRedeem as Utxo;
+      const amount = coin.blindingData.value;
 
-      const coin = coinToRedeem as UnblindedOutput;
-
-      const tx = contractCopy.from(coin.txid, coin.vout, coin.prevout, coin.unblindData).functions
-        .transferWithSum(a, b, signer)
-        .withRecipient(recipient, amount - FEE, network.assetHash)
+      const tx = (contract as Contract)
+        .from(coin.txid, coin.vout, coin.witnessUtxo, {
+          asset: AssetHash.fromHex(coin.blindingData.asset).bytesWithoutPrefix,
+          value: coin.blindingData.value.toString(10),
+          assetBlindingFactor: Buffer.from(coin.blindingData.assetBlindingFactor, 'hex'),
+          valueBlindingFactor: Buffer.from(coin.blindingData.valueBlindingFactor, 'hex'),
+        })
+        .functions.transferWithSum(a, b, signer)
+        .withRecipient(recipient, amount - FEE, networks[coin.scriptDetails.network].assetHash, 0)
         .withFeeOutput(FEE);
 
-      console.log(tx.psbt)
 
       const signed = await tx.unlock();
-      const hex = signed.psbt.extractTransaction().toHex();
+      const transaction = Extractor.extract(signed.pset);
+      const hex = transaction.toHex();
       const r = await marina.broadcastTransaction(hex);
       txid = r.txid;
     } catch (e) {
+      console.error(e);
       handleError(e);
-      throw e
     } finally {
       coinToRedeem = null;
     }
@@ -92,18 +84,9 @@ import { Contract } from '@ionio-lang/ionio';
       error = err.toString();
     }
   }
-
-  async function reloadCoins() {
-    const provider = await detectProvider('marina');
-    await provider.reloadCoins([await provider.getSelectedAccount()]);
-  }
 </script>
 
 <div class="box">
-  <button type="button" class="button" on:click={reloadCoins}
-    >RELOAD COINS</button
-  >
-
   <form>
     <div class="field">
       <!-- svelte-ignore a11y-label-has-associated-control -->
@@ -127,7 +110,8 @@ import { Contract } from '@ionio-lang/ionio';
             on:change={onSelectCoin}
           >
             {#each coins as utxo}
-              <option value={utxo}>{utxo.unblindData.value} sats (L-BTC)</option
+              <option value={utxo}
+                >{utxo.blindingData.value} sats (L-BTC)</option
               >
             {/each}
           </select>

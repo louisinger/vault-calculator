@@ -39,15 +39,13 @@
     "format:check": "npx prettier --check src/**/*.svelte",
     "format": "npx prettier --write src/**/*.svelte"
   },
-  "resolutions": {
-    "liquidjs-lib": "git+https://github.com/louisinger/liquidjs-lib.git#psbt-taproot-support"
-  },
   "dependencies": {
-    "@ionio-lang/ionio": "^0.1.9",
+    "@ionio-lang/ionio": "^0.3.0",
+    "@vulpemventures/secp256k1-zkp": "^2.1.1",
     "bulma": "^0.9.3",
     "classnames": "^2.3.1",
-    "ldk": "^0.5.2",
-    "marina-provider": "^1.7.1",
+    "liquidjs-lib": "^6.0.2-liquid.23",
+    "marina-provider": "https://github.com/louisinger/marina-provider.git#new-provider",
     "svelte-marina-button": "^0.1.4",
     "tiny-secp256k1": "^2.2.1"
   },

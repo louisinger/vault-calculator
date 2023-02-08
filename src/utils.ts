@@ -1,25 +1,22 @@
-import type { Artifact } from "@ionio-lang/ionio";
-import { bip341, getNetwork, script } from "ldk";
-import { detectProvider } from "marina-provider";
+import { Artifact, Parameter, replaceArtifactConstructorWithArguments, templateString } from "@ionio-lang/ionio";
+import { bip341, networks, script } from "liquidjs-lib";
+import { AccountType, detectProvider } from "marina-provider";
+import artifactJSON from './calculator.json';
 
-export async function createAccount(namespace: string, artifact: Artifact) {
-    const marina = await detectProvider('marina');
-    if (await marina.getSelectedAccount() === namespace) return;
-    let ok = false;
-    try {
-      ok = await marina.useAccount(namespace);
-    } catch {
-      ok = false;
-    }
+export async function createAccount(namespace: string) {
+  console.log('createAccount', namespace)
+  const marina = await detectProvider('marina');
+  let ok = false;
+  try {
+    ok = await marina.useAccount(namespace);
+  } catch {
+    ok = false;
+  }
 
-    if (!ok) {
-      await marina.createAccount(namespace) 
-      await marina.useAccount(namespace);
-      await marina.importTemplate({
-          type: 'ionio-artifact',
-          template: JSON.stringify(artifact),
-        });
-    }
+  if (!ok) {
+    await marina.createAccount(namespace, AccountType.Ionio);
+    await marina.useAccount(namespace);
+  }
 }
 
 // send some marina coins to another account
@@ -28,18 +25,24 @@ export async function transferLBTCToAccount(namespace: string, amount: number, s
   const marina = await detectProvider('marina');
   if (await marina.getSelectedAccount() !== namespace) throw new Error('wrong account');
   const network = await marina.getNetwork();
-  const asset = getNetwork(network).assetHash;
+  const asset = networks[network].assetHash;
+  // change the pubkey argument name and replace it by the account namespace in order to let marina injects the right pubkey in the artifact
+  const artifact = replaceArtifactConstructorWithArguments(
+    artifactJSON as Artifact, 
+    [templateString('sum'), templateString(namespace)]
+  );
+
   const tx = await marina.sendTransaction([{
-    address: (await marina.getNextAddress({ sum })).confidentialAddress,
+    address: (await marina.getNextAddress({ artifact, args: { sum } })).confidentialAddress,
     value: amount,
     asset,
   }]);
 
-  await marina.reloadCoins([namespace]);
+  console.log(tx)
   return tx.txid;
 }
 
- export function findRedeemLeaf(tree: bip341.HashTree): { leaf: bip341.HashTree, sum: number, xonlypubkey: string } | undefined {
+export function findRedeemLeaf(tree: bip341.HashTree): { leaf: bip341.HashTree, sum: number, xonlypubkey: string } | undefined {
   if (!tree.scriptHex) {
     if (!tree.left && !tree.right) {
       return undefined;

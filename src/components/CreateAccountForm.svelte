@@ -1,25 +1,10 @@
 <script lang="ts">
   import { createAccount } from '../utils';
-  import {
-    toDescriptor,
-    transformArtifact,
-    TemplateString,
-    Artifact,
-  } from '@ionio-lang/ionio';
-  import artifact from '../calculator.json';
 
   let accountNamespace: string;
 
   const handleSubmit = async () => {
-    console.log(artifact);
-    const transformedArtifact = transformArtifact(artifact as Artifact, [
-      undefined,
-      TemplateString(accountNamespace),
-    ]);
-    await createAccount(
-      accountNamespace,
-      transformedArtifact
-    );
+    await createAccount(accountNamespace);
   };
 </script>
 
