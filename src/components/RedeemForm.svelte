@@ -25,11 +25,14 @@
 
   const onSelectCoin = async () => {
     const { scriptDetails } = coinToRedeem as Utxo;
+    const marina = await detectProvider();
+    const network = await marina.getNetwork();
+
     if (isIonioScriptDetails(scriptDetails)) {
       contract = new Contract(
         scriptDetails.artifact,
         scriptDetails.params,
-        networks[scriptDetails.network],
+        networks[network],
         { ecc, zkp: await zkpLib() }
       );
     } else {
@@ -56,13 +59,18 @@
         .from(coin.txid, coin.vout, coin.witnessUtxo, {
           asset: AssetHash.fromHex(coin.blindingData.asset).bytesWithoutPrefix,
           value: coin.blindingData.value.toString(10),
-          assetBlindingFactor: Buffer.from(coin.blindingData.assetBlindingFactor, 'hex'),
-          valueBlindingFactor: Buffer.from(coin.blindingData.valueBlindingFactor, 'hex'),
+          assetBlindingFactor: Buffer.from(
+            coin.blindingData.assetBlindingFactor,
+            'hex'
+          ),
+          valueBlindingFactor: Buffer.from(
+            coin.blindingData.valueBlindingFactor,
+            'hex'
+          ),
         })
         .functions.transferWithSum(a, b, signer)
-        .withRecipient(recipient, amount - FEE, networks[coin.scriptDetails.network].assetHash, 0)
+        .withRecipient(recipient, amount - FEE, coin.blindingData.asset, 0)
         .withFeeOutput(FEE);
-
 
       const signed = await tx.unlock();
       const transaction = Extractor.extract(signed.pset);
