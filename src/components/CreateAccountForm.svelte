@@ -18,7 +18,7 @@
       <input
         class="input"
         type="text"
-        placeholder="eg. "vault""
+        placeholder="eg. 'vault'"
         bind:value={accountNamespace}
         required
       />

@@ -1,8 +1,7 @@
+![GitHub Pages](https://github.com/louisinger/vault-calculator/actions/workflows/gh-pages.yml/badge.svg)
 # Vault Calculator
 
 Lock your Liquid assets using a simple Ionio contract & Marina wallet.
-
-![GitHub Pages](https://github.com/vulpemventures/marina-api-test-app/actions/workflows/gh-pages.yml/badge.svg)
 
 ## Development
 
