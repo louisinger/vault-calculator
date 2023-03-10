@@ -1,29 +1,25 @@
-# svelte-webpack-bulma
+# Vault Calculator
 
-Template for Svelte with TypeScript, Webpack and Bulma CSS library. 
+Lock your Liquid assets using a simple Ionio contract & Marina wallet.
 
+![GitHub Pages](https://github.com/vulpemventures/marina-api-test-app/actions/workflows/gh-pages.yml/badge.svg)
 
-## What's inside?
+## Development
 
-- TypeScript
-- Webpack (with Node.js polyfill plugin)
-- Bulma
-- Prettier
-- ESLint
-
-
-### Using `degit`
-
-To create a new project locally, run
+### Install dependencies
 
 ```bash
-npx degit "tiero/svelte-webpack-bulma" my-app
+yarn install
 ```
 
-[`degit`](https://github.com/Rich-Harris/degit) is a scaffolding tool that lets you create a directory from a branch in a repository.
+### Run the app
 
-Replace `my-app` with the path where you wish to create the project.
+```bash
+yarn dev
+```
 
-### Using GitHub templates
+### Build the app
 
-Alternatively, you can create the new project as a GitHub repository using GitHub's template feature.
+```bash
+yarn build
+```

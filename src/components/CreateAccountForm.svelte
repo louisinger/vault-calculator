@@ -8,25 +8,25 @@
   };
 </script>
 
-<form class="box">
-  <!--  <h1 class="title">Mint & Sell your NFT</h1> -->
-  <div>Create addition-locker account</div>
+<form>
+  <h2>Create new Ionio account</h2>
   <br />
-  <div class="field">
-    <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label class="label">Account name</label>
-    <p class="control">
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <label class="label">Account name</label>
+  <div class="columns field">
+    <div class="column">
       <input
         class="input"
         type="text"
-        placeholder="eg. borrowAccount"
+        placeholder="eg. "vault""
         bind:value={accountNamespace}
         required
       />
-    </p>
+    </div>
+    <div class="column">
+      <button type="button" class="button" on:click={handleSubmit}>
+        CREATE
+      </button>
+    </div>
   </div>
-
-  <button type="button" class="button" on:click={handleSubmit}
-    >CREATE ACCOUNT</button
-  >
 </form>

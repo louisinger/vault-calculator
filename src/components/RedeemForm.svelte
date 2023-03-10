@@ -14,9 +14,11 @@
   let error: string;
   let txid: string | null = null;
 
-  let a, b = 0;
+  let a,
+    b = 0;
 
   $: accountNamespace = getSelectedAccountUtxos();
+
   async function getSelectedAccountUtxos(): Promise<Utxo[]> {
     const marina = await detectProvider();
     const selectedAccount = await marina.getSelectedAccount();
@@ -94,47 +96,53 @@
   }
 </script>
 
-<div class="box">
+<div>
+  <h2>Redeem coins</h2>
+  <br />
   <form>
-    <div class="field">
-      <!-- svelte-ignore a11y-label-has-associated-control -->
-      <label class="label">Recipient</label>
-      <p class="control">
-        <input
-          class="input"
-          type="text"
-          placeholder="who should receive the coins?"
-          bind:value={recipient}
-          required
-        />
-      </p>
-    </div>
-    <div class="field">
-      <div class="select">
-        {#await accountNamespace then coins}
-          <select
-            class="select is-primary"
-            bind:value={coinToRedeem}
-            on:change={onSelectCoin}
-          >
-            {#each coins as utxo}
-              <option value={utxo}
-                >{utxo.blindingData.value} sats (L-BTC)</option
-              >
-            {/each}
-          </select>
-        {/await}
+    <div class="columns">
+      <div class="column field">
+        <!-- svelte-ignore a11y-label-has-associated-control -->
+        <label class="label">Coin to redeem</label>
+        <div class="select">
+          {#await accountNamespace then coins}
+            <select
+              class="select is-primary"
+              bind:value={coinToRedeem}
+              on:change={onSelectCoin}
+            >
+              {#each coins as utxo}
+                <option value={utxo}
+                  >{utxo.blindingData.value} sats (L-BTC)</option
+                >
+              {/each}
+            </select>
+          {/await}
+        </div>
+        {#if contract != null}
+          <h2>Sum must be {contract.constructorArgs[0]}</h2>
+          <p class="control">
+            <input class="input" type="number" bind:value={a} required />
+          </p>
+          <h1>+</h1>
+          <p class="control">
+            <input class="input" type="number" bind:value={b} required />
+          </p>
+        {/if}
       </div>
-      {#if contract != null}
-        <h2>Sum must be {contract.constructorArgs[0]}</h2>
+      <div class="column field">
+        <!-- svelte-ignore a11y-label-has-associated-control -->
+        <label class="label">Recipient</label>
         <p class="control">
-          <input class="input" type="number" bind:value={a} required />
+          <input
+            class="input"
+            type="text"
+            placeholder="who should receive the coins?"
+            bind:value={recipient}
+            required
+          />
         </p>
-        <h1>+</h1>
-        <p class="control">
-          <input class="input" type="number" bind:value={b} required />
-        </p>
-      {/if}
+      </div>
     </div>
     <button type="button" class="button" on:click={handleSubmit}>REDEEM</button>
     {#if error}
