@@ -28,7 +28,8 @@ module.exports = {
 		fallback: {
 			"fs": false,
 			"path": false,
-		}
+		},
+		conditionNames: "svelte"
 	},
 	output: {
 		path: path.join(__dirname, 'dist'),
