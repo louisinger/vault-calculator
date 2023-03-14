@@ -1,5 +1,6 @@
 {
-  "name": "svelte-webpack-bulma",
+  "name": "vault-calculator",
+  "homepage": "https://louisinger.github.io/vault-calculator",
   "version": "1.0.0",
   "devDependencies": {
     "@tsconfig/svelte": "^1.0.10",
